@@ -1,0 +1,50 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="MasterPage" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <title>John Morrissey Lab 2</title>
+    <link href="StyleSheet.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder id="head" runat="server">
+        
+    </asp:ContentPlaceHolder>
+</head>
+<body >
+
+
+    <form id="form1" runat="server">
+    <div >
+        <section>
+        
+        
+            <asp:Menu CssClass="rounded" ID="navigationBar" runat="server" Orientation="Horizontal" BorderStyle="Double" BorderWidth="4px">
+                <DynamicHoverStyle BackColor="#843794" Font-Size="X-Large" />
+                <DynamicMenuItemStyle  Font-Bold="True" Font-Size="X-Large" ItemSpacing="20em" Width="100em" />
+                <DynamicMenuStyle BackColor="#31013B" />
+                <Items >
+                    <asp:MenuItem Text="Employee" NavigateUrl="~/Employee.aspx"></asp:MenuItem>
+                    <asp:MenuItem Text="Project" NavigateUrl="~/Project.aspx"></asp:MenuItem>
+                    <asp:MenuItem Text="Skill" NavigateUrl="~/Skill.aspx"></asp:MenuItem>
+                </Items>
+                <StaticHoverStyle BackColor="#5c9500"  ForeColor="#cff994"/>
+                <StaticMenuItemStyle  Font-Bold="True" Font-Size="X-Large" ForeColor="whitesmoke" HorizontalPadding="1em" />
+                <StaticMenuStyle BackColor="#274400" HorizontalPadding="5em" Width="50%"  />
+                <StaticSelectedStyle BackColor="#741A87" ForeColor="Black" />
+            </asp:Menu>
+        </section>
+        
+        
+        
+                
+        <asp:ContentPlaceHolder id="ContentPlaceHolder1" runat="server">
+            
+            
+        </asp:ContentPlaceHolder>
+        
+    </div>
+   
+    </form>
+    </body>
+    
+</html>
