@@ -90,7 +90,7 @@
             <p>
                 <asp:Button CssClass="btn" ID="btnCommitEmployee" runat="server" Text="Commit" OnClick="btnCommitEmployee_Click" />
                 <asp:Button CssClass="btn" ID="btnClear" runat="server" Text="Clear" OnClick="btnClear_Click" />
-                <asp:Button CssClass="btn" ID="btnExit" runat="server" Text="Exit" OnClick="btnExit_Click" />
+                <asp:Button CssClass="btn" ID="btnExit" runat="server" Text="Exit" OnClick="btnExit_Click" formnovalidate=""/>
             </p>
             <p>
                 <asp:Label ID="resultMessage" runat="server" Text=""></asp:Label>
@@ -101,8 +101,7 @@
                 <asp:Label ID="errorMessage" runat="server" Text=""></asp:Label>
             </p>
             <p>
-                <asp:CheckBox ID="CheckBox1" Text="Display All Information" Checked="true" runat="server" />
-            </p>
+                &nbsp;</p>
         </section>
         
             

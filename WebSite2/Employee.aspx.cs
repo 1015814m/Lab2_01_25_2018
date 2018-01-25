@@ -46,8 +46,9 @@ public partial class EmployeeDefault : System.Web.UI.Page
         }
 
         //Set the variables for the users selections
-        selectSkill = skillDropDown.SelectedIndex - 1;
-        selectProject = projectDropDown.SelectedIndex - 1;
+        selectSkill = skillDropDown.SelectedIndex;
+        
+        selectProject = projectDropDown.SelectedIndex;
 
         //Select from the database and add that to the drop down
         projectDropDown.Items.Clear();
@@ -62,8 +63,10 @@ public partial class EmployeeDefault : System.Web.UI.Page
 
     protected void btnCommitEmployee_Click(object sender, EventArgs e)
     {
-        
+        resultMessage.Text = "";
+        errorMessage.Text = "";
         Boolean ensureDB = true;
+        resultMessage.Text += "The current value of select project: " + selectProject;
 
         try
         {
@@ -71,41 +74,53 @@ public partial class EmployeeDefault : System.Web.UI.Page
             if (!checkEntries())
             {
                 //check to ensure that all textboxes values can be parsed
+                errorMessage.Text += " 0001";
                 ensureDB = false;
             }
             if (!checkDate(DateTime.Parse(txtHireDate.Text),DateTime.Parse(txtTerminationDate.Text)))
             {
                 //check the hire date against the termination date
+                errorMessage.Text += " 0002";
                 ensureDB = false;
                 resultMessage.Text += " Please ensure the dates entered are correct.\nHire Date " +
                     "cannot be before the termination date.";
             }
-            if (projectDropDown.SelectedIndex != 0)
+            if (selectProject > 0)
             {
-                if (txtProjStart.Text != "" || txtProjEnd.Text != "") //check to make sure the project start date and end date are selected
+                errorMessage.Text += " 0013";
+                if (txtProjStart.Text != "" ) //check to make sure the project start date and end date are selected
                 {
-                    if (!checkDate(DateTime.Parse(txtProjStart.Text), DateTime.Parse(txtProjEnd.Text)))
+                    errorMessage.Text += " 0023";
+                    if (txtProjEnd.Text != "")
                     {
-                        //check the project start date against the project end date
-                        ensureDB = false;
-                        resultMessage.Text += " The project start data must be before the project end date";
-                        
+                        errorMessage.Text += " 0033";
+                        if (!checkDate(DateTime.Parse(txtProjStart.Text), DateTime.Parse(txtProjEnd.Text)))
+                        {
+                            //check the project start date against the project end date
+                            errorMessage.Text += " 0043";
+                            ensureDB = false;
+                            resultMessage.Text += " The project start data must be before the project end date";
+
+                        }
                     }
                 }
                 else
                 {
-                    resultMessage.Text += " When adding an employee with a project please enter a start and end date.";
+                    resultMessage.Text += " When adding an employee with a project please enter a start date.";
                     ensureDB = false;
                 }
                 
             }
-            if (true)
+            if (!checkDate(DateTime.Parse(txtHireDate.Text),DateTime.Parse(txtProjStart.Text)))
             {
-                //check to ensure that the user doesnt already exist
+                errorMessage.Text += " 0004";
+                ensureDB = false;
+                resultMessage.Text += " Please ensure that the hire date is before the project start date.";
             }
             if (!checkAge(DateTime.Parse(txtDateOfBirth.Text)))
             {
                 //check to ensure that all users are atleast 18 years old
+                errorMessage.Text += " 0005";
                 ensureDB = false;
                 resultMessage.Text += " Please ensure that all employees are 18 years old when hired.";
                 txtHireDate.Focus();
@@ -113,6 +128,7 @@ public partial class EmployeeDefault : System.Web.UI.Page
             if (!checkState(txtState.Text))
             {
                 //check that the user entered a state in the United States
+                errorMessage.Text += " 0006";
                 ensureDB = false;
                 resultMessage.Text += " Please enter a valid US state.";
                 txtState.Focus();
@@ -122,12 +138,14 @@ public partial class EmployeeDefault : System.Web.UI.Page
                 if (!findID(int.Parse(txtManagerID.Text)))
                 {
                     //check to see if the manager ID already exists
+                    errorMessage.Text += "0017";
                     ensureDB = false;
                     resultMessage.Text += " The manager ID you have entered does not exist.";
                     txtManagerID.Focus();
                 }
                 if(int.Parse(txtManagerID.Text) < 0)
                 {
+                    errorMessage.Text += " 0027";
                     ensureDB = false;
                     resultMessage.Text += " Manager ID must be positive.";
                     txtManagerID.Focus();
@@ -136,6 +154,7 @@ public partial class EmployeeDefault : System.Web.UI.Page
             if (int.Parse(txtSalary.Text) < 0)
             {
                 //check to ensure all number entries are positive numbers
+                errorMessage.Text += " 0008";
                 ensureDB = false;
                 resultMessage.Text += " Salary must be a positive number.";
             }
@@ -203,8 +222,18 @@ public partial class EmployeeDefault : System.Web.UI.Page
                 //Insert the user into the database
                 commitEmployeeToDB(newEmployee);
 
-                resultMessage.Text = "User Created: ID# " + findMaxID() + " " + newEmployee.FirstName + " "
+                resultMessage.Text += "User Created: ID# " + findMaxID() + " " + newEmployee.FirstName + " "
                     + newEmployee.LastName;
+
+                if (selectSkill != 0)
+                {
+                    insertBridgeSkill();
+                }
+                if (selectProject > 0)
+                {
+                    
+                    insertBridgeProject();
+                }
 
                 GridView1.DataBind();
             }
@@ -212,7 +241,7 @@ public partial class EmployeeDefault : System.Web.UI.Page
         catch (Exception c)
         {
             resultMessage.Text += "Please ensure that all entries are valid.";
-            errorMessage.Text += " c";
+            errorMessage.Text += c;
         }
 
 
@@ -242,9 +271,9 @@ public partial class EmployeeDefault : System.Web.UI.Page
 
     protected void btnExit_Click(object sender, EventArgs e)
     {
-        
-        //Exits the web application
 
+        //Exits the web application
+        testInfo();
     }
 
     private void selectFromDB(string table, string column, Control cntrl)
@@ -295,7 +324,7 @@ public partial class EmployeeDefault : System.Web.UI.Page
         }
     }
 
-    private void insertBridge(int id, Employee person)
+    private void insertBridgeSkill()
     {
         try
         {
@@ -314,6 +343,38 @@ public partial class EmployeeDefault : System.Web.UI.Page
         catch (Exception c)
         {
 
+            errorMessage.Text += c;
+        }
+    }
+
+    private void insertBridgeProject()
+    {
+        try
+        {
+            //Connect to the DB
+            System.Data.SqlClient.SqlConnection sqlc = connectToDB();
+
+            //Creates a new sql insert statement to insert into the bridge table
+            System.Data.SqlClient.SqlCommand insert = new System.Data.SqlClient.SqlCommand();
+            insert.Connection = sqlc;
+            insert.CommandText = "insert into [dbo].[EMPLOYEEPROJECT] values (" + findMaxID() + ","
+                + selectProject + ",'" + DateTime.Parse(txtProjStart.Text) + "',";
+            if (txtProjEnd.Text == "")
+            {
+                insert.CommandText += "NULL,'";
+            }
+            else
+            {
+                insert.CommandText += "'" + DateTime.Parse(txtProjEnd.Text) + "','";
+            }
+            insert.CommandText += (string)Session["user"] + "','" + System.DateTime.Now + "')";
+            resultMessage.Text = insert.CommandText;
+            insert.ExecuteNonQuery();
+            sqlc.Close();
+        }
+        catch (Exception c )
+        {
+            errorMessage.Text += "\n 0009";
             errorMessage.Text += c;
         }
     }
@@ -413,8 +474,14 @@ public partial class EmployeeDefault : System.Web.UI.Page
         {
             DateTime.Parse(txtDateOfBirth.Text);
             DateTime.Parse(txtHireDate.Text);
-            DateTime.Parse(txtProjStart.Text);
-            DateTime.Parse(txtProjEnd.Text);
+            if (selectProject > 0)
+            {
+                DateTime.Parse(txtProjStart.Text);
+                if (txtProjEnd.Text != "")
+                {
+                    DateTime.Parse(txtProjEnd.Text);
+                }
+            }
             if (txtTerminationDate.Text != "")
             {
                 DateTime.Parse(txtTerminationDate.Text);
@@ -525,6 +592,25 @@ public partial class EmployeeDefault : System.Web.UI.Page
             errorMessage.Text += c;
             return false;
         }
+    }
+
+    private void testInfo()
+    {
+        txtFirstName.Text = "John";
+        txtLastName.Text = "Morrissey";
+        txtMiddleInitial.Text = "S";
+        txtDateOfBirth.Text = "1995-02-22";
+        txtStreet.Text = "snowberry lane";
+        txtHouseNum.Text = "462";
+        txtCity.Text = "harrisonburg";
+        txtState.Text = "va";
+        txtCountry.Text = "us";
+        txtHireDate.Text = "2017-01-01";
+        txtTerminationDate.Text = "2017-02-02";
+        txtSalary.Text = "54000";
+        txtManagerID.Text = "1";
+        txtZip.Text = "22801";
+        
     }
 
 
